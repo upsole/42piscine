@@ -1,0 +1,4 @@
+test.c
+*.h.gch
+*.out
+main.c

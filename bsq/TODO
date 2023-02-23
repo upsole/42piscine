@@ -1,0 +1,7 @@
+PARSER VALIDATION
+	validar en read (scanf con pocas lineas segfaults)
+S_MAP FREES
+
+** norminette && make antes de pushear :3
+
+!!! eliminar todos los files sobrantes antes de cerrar el proyecto
