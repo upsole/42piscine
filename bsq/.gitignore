@@ -1,9 +1,0 @@
-bsq
-*.swp
-*.out
-maps
-map_*
-.DS_Store
-test.c
-*.a
-*.o
