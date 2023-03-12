@@ -2,7 +2,9 @@ NAME=ft_cat
 FLAGS=-Wall -Wextra -Werror
 OBJS=""
 
-all:
+all: ${NAME}
+
+${NAME}: *.c
 	cc ${FLAGS} *.c -o ${NAME}
 clean:
 	rm *.o

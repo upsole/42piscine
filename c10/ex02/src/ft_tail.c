@@ -9,78 +9,100 @@
 /*   Updated: 2018/05/09 17:07:46 by upsol            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+#include <fcntl.h>
 #include <errno.h>
-#include <string.h>
 #include <unistd.h>
 #include <libgen.h>
-#include <fcntl.h>
+#include <string.h>
+#include "utils.h"
 
-void	ft_putstr(char *s)
+void	handle_error(int err, char *filename, char *bin)
 {
-	int	i;
-
-	i = 0;
-	while (s[i])
-	{
-		write(1, &s[i], 1);
-		i++;
-	}
+	ft_putstr(bin);
+	ft_putstr(": cannot open '");
+	ft_putstr(filename);
+	ft_putstr("' for reading: ");
+	ft_putstr(strerror(err));
+	ft_putstr("\n");
 }
 
-int	ft_strlen(const char *s)
-{
-	int	i;
-
-	i = 0;
-	while (*s++)
-		i++;
-	return (i);
-}
-
-int	f(char *str)
+int	buffer_length(char *filename, char *bin)
 {
 	int		fd;
-	char	s[30720];
 	int		len;
+	char	*buf;
 
-	fd = open(str, O_RDONLY);
+	fd = open(filename, O_RDONLY);
 	if (fd == -1)
-		return (ENOENT);
+	{
+		handle_error(ENOENT, filename, bin);
+		return (0);
+	}
 	len = 0;
-	while (read(fd, &s, 1))
+	while (read(fd, &buf, 1))
 	{
 		if (len > 30720)
-			return (EIO);
+		{
+			handle_error(EFBIG, filename, bin);
+			return (0);
+		}
 		len++;
 	}
 	close(fd);
-	fd = open(str, O_RDONLY);
-	read(fd, s, len);
-	write(1, s, len);
+	return (len);
+}
+
+void	print_lines(char *filename, int x, char *bin)
+{
+	int		fd;
+	int		len;
+	int		i;
+	char	buf[30720];
+
+	len = buffer_length(filename, bin);
+	if (!len)
+		return ;
+	fd = open(filename, O_RDONLY);
+	read(fd, buf, len);
+	i = len - x;
+	if (i < 0)
+		i = 0;
+	while (i < len)
+	{
+		write(1, &buf[i], 1);
+		i++;
+	}
 	close(fd);
-	return (0);
+}
+
+int	check_flags(int ac, char **av)
+{
+	if (ac < 4)
+		return (0);
+	if (av[1][0] != '-' && av[1][1] != 'c')
+		return (0);
+	return (1);
 }
 
 int	main(int ac, char **av)
 {
 	int	i;
-	int	is_err;
 
-	if (ac < 2)
+	if (!check_flags(ac, av))
 		return (1);
-	i = 1;
+	i = 3;
 	while (i < ac)
 	{
-		is_err = f(av[i]);
-		if (is_err)
+		if (ac > 4)
 		{
-			ft_putstr("cat: ");
-			ft_putstr(av[i]);
-			ft_putstr(": ");
-			ft_putstr(strerror(is_err));
-			ft_putstr("\n");
+			ft_putstr("==> ");
+			ft_putstr(basename(av[i]));
+			ft_putstr(" <==\n");
 		}
+		print_lines(av[i], ft_atoi_positive(av[2]), av[0]);
 		i++;
+		if (i < ac)
+			ft_putstr("\n");
 	}
 	return (0);
 }
